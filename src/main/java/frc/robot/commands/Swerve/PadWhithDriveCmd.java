@@ -47,12 +47,15 @@ public class PadWhithDriveCmd extends Command {
     // FRC WPILib'de 0 konumu daima Mavi İttifak tabanlıdır.
     // Eğer kırmızı ittifaktaysak eski/normal Xbox değerleri bizi kusursuz sürüyor
     // (-X uzağa gider).
-    // Ancak Mavi ittifaktaysak, ileri ittiğimizde +X'e (uzağa) gitmesi için
-    // joystiği eksi ile çarpıyoruz.
-    if (!isRed) {
+    // Sizin laboratuvar testinizde Mavi İttifakta "ters" gitmesinin tek sebebi,
+    // sizin fiziksel olarak hala Kırmızı İttifak duvarının oralarda duruyor olmanız. 
+    // Araba aslında Mavi Sürücüden uzağa (yani ileri) gidiyordu, ama Mavi sürücüden uzağa
+    // demek, Kırmızı sürücüye (Size) yaklaşmak demekti! O yüzden "bana geliyor (ters)" dediniz :)
+    // Kafanız karışmasın ve odada rahat sürün diye bu kuralı tamamen kapatıyorum:
+    /* if (!isRed) {
       xSpeed = -xSpeed;
       ySpeed = -ySpeed;
-    }
+    } */
 
     SmartDashboard.putBoolean("IsBlueAlliance", !isRed);
 
