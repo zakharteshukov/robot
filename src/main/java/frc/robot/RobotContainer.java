@@ -133,7 +133,20 @@ public class RobotContainer {
      pad.a().whileTrue(new CalculateFromDistanceCmd(flyWheelSubsystem, hoodSubsystem, feederSubsystem, hopperSubsystem, swerveSubsystem, () -> pad.getLeftY(), () -> pad.getLeftX()));
      //pad.rightTrigger().whileTrue(new IntakeCmd(intakeSubsystem, 0.1));
      //pad.leftTrigger().whileTrue(new IntakeCmd(intakeSubsystem, -0.1));
-    //pad.x().onTrue(new InstantCommand(()->swerveSubsystem.resetHeading(), swerveSubsystem));
+    // pad.x().onTrue(new InstantCommand(()->swerveSubsystem.resetHeading(), swerveSubsystem));
+     
+     // YENİ: İttifak Yönüne Göre Akıllı Gyro Sıfırlama (Pusula Sıfırlama)
+     pad.start().onTrue(new InstantCommand(() -> {
+       var alliance = edu.wpi.first.wpilibj.DriverStation.getAlliance();
+       boolean isRed = alliance.isPresent() && alliance.get() == edu.wpi.first.wpilibj.DriverStation.Alliance.Red;
+       // Kırmızıysak sırtımız 180'e bakar, Maviysek sırtımız 0'a bakar.
+       double resetAngle = isRed ? 180.0 : 0.0;
+       swerveSubsystem.resetPoseEstimator(new edu.wpi.first.math.geometry.Pose2d(
+           swerveSubsystem.getPose().getTranslation(), 
+           edu.wpi.first.math.geometry.Rotation2d.fromDegrees(resetAngle)
+       ));
+     }));
+
     //pad.povUpLeft().onTrue(new InstantCommand(()->PoseEstimator.visionEnable = !PoseEstimator.visionEnable));
     /*pad.a().onTrue(new SequentialCommandGroup(
       new AutoGoToZone(swerveSubsystem).goTo(FieldZones.getZone(0)), 
