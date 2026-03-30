@@ -1,7 +1,5 @@
 package frc.robot.vision;
 
-
-
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.VecBuilder;
@@ -24,11 +22,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
 
-
-
 public class PoseEstimator extends SubsystemBase {
-
- 
 
   private final SwerveDrivePoseEstimator poseEstimator;
 
@@ -42,19 +36,17 @@ public class PoseEstimator extends SubsystemBase {
 
   public static boolean visionEnable;
 
- 
-
   public PoseEstimator(
 
-    SwerveDriveKinematics kinematics,
+      SwerveDriveKinematics kinematics,
 
-    Supplier<Rotation2d> gyroSupplier,
+      Supplier<Rotation2d> gyroSupplier,
 
-    Supplier<SwerveModulePosition[]> modulePositionSupplier,
+      Supplier<SwerveModulePosition[]> modulePositionSupplier,
 
-    Pose2d initialPose,
+      Pose2d initialPose,
 
-    boolean visionEnabled
+      boolean visionEnabled
 
   )
 
@@ -68,21 +60,21 @@ public class PoseEstimator extends SubsystemBase {
 
     poseEstimator = new SwerveDrivePoseEstimator(
 
-      kinematics,
+        kinematics,
 
-      gyroSupplier.get(),
+        gyroSupplier.get(),
 
-      modulePositionSupplier.get(),
+        modulePositionSupplier.get(),
 
-      initialPose,
+        initialPose,
 
-      // State StdDevs (encoder + gyro güveni)
+        // State StdDevs (encoder + gyro güveni)
 
-      VecBuilder.fill(0.05, 0.05, Math.toRadians(2)),
+        VecBuilder.fill(0.05, 0.05, Math.toRadians(2)),
 
-      // Vision StdDevs (ilk değer, dinamik ayarlanacak)
+        // Vision StdDevs (ilk değer, dinamik ayarlanacak)
 
-      VecBuilder.fill(0.7, 0.7, Math.toRadians(15))
+        VecBuilder.fill(0.7, 0.7, Math.toRadians(15))
 
     );
 
@@ -92,61 +84,52 @@ public class PoseEstimator extends SubsystemBase {
 
   }
 
-
-
   public void updateLimelightOrientation() {
 
     double rollRate = 0.0;
 
     double pitchRate = 0.0;
 
-    double yawRate = -Constants.gyro.getRate(); //(deg/sec)
-
-   
+    double yawRate = -Constants.gyro.getRate(); // (deg/sec)
 
     double roll = 0.0;
 
     double pitch = 0.0;
 
-    double yaw = poseEstimator.getEstimatedPosition().getRotation().getDegrees(); 
+    // double yaw = Math.IEEEremainder(-Constants.gyro.getYaw() , 360);
 
+    double yaw = poseEstimator.getEstimatedPosition().getRotation().getDegrees();
 
     LimelightHelpers.SetRobotOrientation(
 
-    Constants.limelight_name,
+        Constants.limelight_name,
 
-    yaw,  
+        yaw,
 
-    yawRate,
+        yawRate,
 
-    pitch,
+        pitch,
 
-    pitchRate,  
+        pitchRate,
 
-    roll,
+        roll,
 
-    rollRate  
+        rollRate
 
     );
 
-
   }
-
-
 
   private void addLimelightVision() {
 
-   // if (!visionEnable) return;
+    // if (!visionEnable) return;
 
-
-
-    //var estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(LIMELIGHT_NAME);
+    // var estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(LIMELIGHT_NAME);
 
     var estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LIMELIGHT_NAME);
 
-    if (estimate == null || estimate.pose == null) return;
-
-
+    if (estimate == null || estimate.pose == null)
+      return;
 
     Pose2d visionPose = estimate.pose;
 
@@ -156,23 +139,19 @@ public class PoseEstimator extends SubsystemBase {
 
     double avgTagDist = estimate.avgTagDist;
 
+    if (Double.isNaN(visionPose.getX()) || Double.isNaN(visionPose.getY()))
+      return;
 
+    if (Double.isInfinite(visionPose.getX()) || Double.isInfinite(visionPose.getY()))
+      return;
 
-    if (Double.isNaN(visionPose.getX()) || Double.isNaN(visionPose.getY())) return;
-
-    if (Double.isInfinite(visionPose.getX()) || Double.isInfinite(visionPose.getY())) return;
-
-
-
-    if (avgTagDist > 6 || tagCount == 0) return;
-
-
+    if (avgTagDist > 6 || tagCount == 0)
+      return;
 
     double yawRate = Math.abs(-Constants.gyro.getRate());
 
-    if (yawRate > 30.0) return;
-
-
+    if (yawRate > 30.0)
+      return;
 
     // Dinamik güven
 
@@ -180,25 +159,19 @@ public class PoseEstimator extends SubsystemBase {
 
     poseEstimator.setVisionMeasurementStdDevs(
 
-      VecBuilder.fill(xyStdDev, xyStdDev, 9999999.0)
+        VecBuilder.fill(xyStdDev, xyStdDev, 9999999.0)
 
     );
 
-
-
     poseEstimator.addVisionMeasurement(
 
-      visionPose,
+        visionPose,
 
-      timestamp
+        timestamp
 
     );
 
   }
-
-
-
-
 
   public Pose2d getPose() {
 
@@ -206,23 +179,19 @@ public class PoseEstimator extends SubsystemBase {
 
   }
 
-
-
   public void resetPose(Pose2d pose) {
 
     poseEstimator.resetPosition(
 
-      gyroSupplier.get(),
+        gyroSupplier.get(),
 
-      modulePositionSupplier.get(),
+        modulePositionSupplier.get(),
 
-      pose
+        pose
 
     );
 
   }
-
-
 
   @Override
 
@@ -230,21 +199,15 @@ public class PoseEstimator extends SubsystemBase {
 
     updateLimelightOrientation();
 
-   
-
     poseEstimator.update(
 
-      gyroSupplier.get(),
+        gyroSupplier.get(),
 
-      modulePositionSupplier.get()
+        modulePositionSupplier.get()
 
     );
 
-
-
     addLimelightVision();
-
-
 
     field.setRobotPose(getPose());
 
