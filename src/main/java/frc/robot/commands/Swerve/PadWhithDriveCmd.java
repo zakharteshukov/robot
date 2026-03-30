@@ -6,6 +6,7 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
@@ -52,6 +53,8 @@ public class PadWhithDriveCmd extends Command {
       xSpeed = -xSpeed;
       ySpeed = -ySpeed;
     }
+
+    SmartDashboard.putBoolean("IsBlueAlliance", !isRed);
 
     xSpeed = Math.abs(xSpeed) > 0.05 ? xSpeed : 0;
     ySpeed = Math.abs(ySpeed) > 0.05 ? ySpeed : 0;
