@@ -110,7 +110,8 @@ public class CalculateFromDistanceCmd extends Command {
     swerveSubsystem.setState(states);
 
     // Sadece hedef menzilini hesapla ve Shooter'a(Flywheel) hızı yolla.
-    // Robot daha hizalanırken bile tekerleklerin dönmeye (rev up) başlaması atış hızınızı artıracaktır.
+    // Robot daha hizalanırken bile tekerleklerin dönmeye (rev up) başlaması atış
+    // hızınızı artıracaktır.
     double distance = hubPose.getDistance(swerveSubsystem.getPose().getTranslation());
     AngularVelocity flywheelSpeed = flyWheelSubsystem.calculateRpm(distance);
     flyWheelSubsystem.setFlywheelSpeed(flywheelSpeed);
@@ -119,16 +120,19 @@ public class CalculateFromDistanceCmd extends Command {
     edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("A_Mesafe", distance);
     edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("A_HedefRPM", flywheelSpeed.in(RPM));
     edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("A_AciTamamMi", targetAnglePID.atSetpoint());
-    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("A_MevcutAciSalinimi", targetAnglePID.getPositionError());
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("A_MevcutAciSalinimi",
+        targetAnglePID.getPositionError());
 
-    // Eğer Kilitlenme (Açı) Hedefe Ulaştıysa ve Shooter Hızı da yeterince yakınsa Feeder'ı Çalıştır!
-    // Toleransı (50 -> 150 RPM) genişlettim ki ufak dalgalanmalarda feeder takılmasın.
+    // Eğer Kilitlenme (Açı) Hedefe Ulaştıysa ve Shooter Hızı da yeterince yakınsa
+    // Feeder'ı Çalıştır!
+    // Toleransı (50 -> 150 RPM) genişlettim ki ufak dalgalanmalarda feeder
+    // takılmasın.
     if (targetAnglePID.atSetpoint()) {
       if (Conversions.epsilonEquals(flyWheelSubsystem.getFlywheelSpeed().in(RPM), flywheelSpeed.in(RPM), 150)) {
         feederSubsystem.FeedMotorSet(-0.6); // Ateş!
         edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("A_AtesZamani", true);
       } else {
-        feederSubsystem.FeedMotorSet(0.0); 
+        feederSubsystem.FeedMotorSet(0.0);
         edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("A_AtesZamani", false);
       }
     } else {
