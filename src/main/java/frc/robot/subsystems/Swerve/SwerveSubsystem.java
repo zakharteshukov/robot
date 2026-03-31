@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.vision.PoseEstimator;
@@ -169,5 +170,13 @@ public class SwerveSubsystem extends SubsystemBase {
     getRotation2d();
     getPositions();
     poseEstimator.periodic();
+
+    // Robotun anlık hızını (X ve Y hız vektörlerinin bileşkesi) metre/saniye cinsinden buluyoruz.
+    ChassisSpeeds currentSpeeds = getSpeeds();
+    double currentSpeedMetersPerSec = Math.hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
+    
+    // Verileri Elastic Dashboard'a (SmartDashboard tablosu üzerinden) yolluyoruz
+    SmartDashboard.putNumber("Robot Speed (m_s)", currentSpeedMetersPerSec);
+    SmartDashboard.putNumber("Robot Heading (Deg)", getPose().getRotation().getDegrees()); // Odometri (Gyro + Vision hizalaması) yönü
   }
 }

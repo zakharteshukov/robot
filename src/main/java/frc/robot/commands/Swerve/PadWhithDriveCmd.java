@@ -39,29 +39,49 @@ public class PadWhithDriveCmd extends Command {
   public void execute() {
     double xSpeed = xSupplier.getAsDouble();
     double ySpeed = ySupplier.getAsDouble();
-    double azimuth = azimuthSupplier.getAsDouble();
+    double azimuth = -azimuthSupplier.getAsDouble();
 
     var alliance = edu.wpi.first.wpilibj.DriverStation.getAlliance();
     boolean isRed = alliance.isPresent() && alliance.get() == edu.wpi.first.wpilibj.DriverStation.Alliance.Red;
 
-    // FRC WPILib'de 0 konumu daima Mavi İttifak tabanlıdır.
-    // Eğer kırmızı ittifaktaysak eski/normal Xbox değerleri bizi kusursuz sürüyor
-    // (-X uzağa gider).
-    // Sizin laboratuvar testinizde Mavi İttifakta "ters" gitmesinin tek sebebi,
-    // sizin fiziksel olarak hala Kırmızı İttifak duvarının oralarda duruyor olmanız. 
-    // Araba aslında Mavi Sürücüden uzağa (yani ileri) gidiyordu, ama Mavi sürücüden uzağa
-    // demek, Kırmızı sürücüye (Size) yaklaşmak demekti! O yüzden "bana geliyor (ters)" dediniz :)
-    // Kafanız karışmasın ve odada rahat sürün diye bu kuralı tamamen kapatıyorum:
-    /* if (!isRed) {
+    // FRC Sahasında Kırmızı Duvar (Sürücü) +X (16.5m) tarafındadır. Mavi Duvar
+    // (Origin) 0'dadır.
+    // İleri (Kolu itmek) daima Sürücünün baktığı yön olmalıdır (Kırmızıdan Maviye,
+    // Maviden Kırmızıya).
+    // Kırmızı Sürücü ileri ittiğinde: X ekseninde 16.5'ten 0'a, yani Negatif (-X)
+    // değerine inmelidir. (Xbox kolu zaten -1 verir, bu yüzden birebir uyar!)
+    // Mavi Sürücü İleri ittiğinde: X ekseninde 0'dan 16.5'e, yani Pozitif (+X)
+    // değerine çıkmalıdır. (Xbox kolu -1 çıkaracağından eksi ile çarpılıp (+)
+    // yapılmalıdır!)
+    if (!isRed) {
       xSpeed = -xSpeed;
       ySpeed = -ySpeed;
-    } */
+    }
 
     SmartDashboard.putBoolean("IsBlueAlliance", !isRed);
 
-    xSpeed = Math.abs(xSpeed) > 0.05 ? xSpeed : 0;
-    ySpeed = Math.abs(ySpeed) > 0.05 ? ySpeed : 0;
-    azimuth = Math.abs(azimuth) > 0.05 ? azimuth : 0;
+    // Daha profesyonel ve pürüzsüz bir sürücü deneyimi için MathUtil.applyDeadband
+    // kullanıyoruz.
+    // Düz Math.abs tetiği 0.11'e geldiğinde anında %11 güç verip zıplatır.
+    // applyDeadband ise 0.11'de 0'dan yeni başlar ve %1 güç verir. Çok daha
+    // yumuşaktır.
+    // Xbox Series S kontrolcüleri çok hassastır, bu yüzden 0.10 olan ölü bölgeyi
+    // (Deadband)
+    // 0.05'e indirerek kolun boşluğunu iyice hissettirmeden sıfırladım.
+    xSpeed = edu.wpi.first.math.MathUtil.applyDeadband(xSpeed, 0.05);
+    ySpeed = edu.wpi.first.math.MathUtil.applyDeadband(ySpeed, 0.05);
+    azimuth = edu.wpi.first.math.MathUtil.applyDeadband(azimuth, 0.05);
+
+    // Karesel (Quadratic) Sürüş Eğrisi: F310 gibi kollar lineerdir. Ufak dokununca
+    // çok tepki verirler.
+    // Değerlerin karesini alarak küçük dokunuşları ufacık hızlara (örn: 0.2 ->
+    // 0.04),
+    // ama tam gazı yine tam güce (1.0 -> 1.0) çeviriyoruz.
+    // Robot pamuk gibi kalkacak ve duracak.
+    xSpeed = Math.copySign(xSpeed * xSpeed, xSpeed);
+    ySpeed = Math.copySign(ySpeed * ySpeed, ySpeed);
+    azimuth = Math.copySign(azimuth * azimuth * azimuth, azimuth); // Dönüşte çok ufak hareketleri emmek için küp
+                                                                   // kullanılır.
 
     xSpeed = xLimiter.calculate(xSpeed) * Constants.ModuleConstants.LinearMaxSpeed;
     ySpeed = yLimiter.calculate(ySpeed) * Constants.ModuleConstants.LinearMaxSpeed;
@@ -70,7 +90,7 @@ public class PadWhithDriveCmd extends Command {
     ChassisSpeeds speed;
 
     if (fieldOrientedSupplier.getAsBoolean()) {
-      speed = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, azimuth, swerveSubsystem.getRotation2d());
+      speed = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, azimuth, swerveSubsystem.getPose().getRotation());
     } else {
       speed = new ChassisSpeeds(xSpeed, ySpeed, azimuth);
     }

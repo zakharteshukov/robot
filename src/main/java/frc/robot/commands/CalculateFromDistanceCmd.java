@@ -71,14 +71,18 @@ public class CalculateFromDistanceCmd extends Command {
     Translation2d hubPose = FieldZones.HubZones.getHub().toTranslation2d();
     Rotation2d targetAngle = hubPose.minus(swerveSubsystem.getPose().getTranslation())
     .getAngle().rotateBy(FieldZones.getAlliance() == Alliance.Red ? Rotation2d.kZero : Rotation2d.k180deg);
-    double azimuth = targetAnglePID.calculate(swerveSubsystem.getRotation2d().getDegrees(), targetAngle.getDegrees());
+    
+    // YENİ: PID hesabını direkt ham gyroya göre YAPMAMALIYIZ! 
+    // Odometri (Start tuşuyla ofsetlenmiş, Limelight ile senkron) yönünü kullanmalıyız. Yoksa kendi etrafında döner veya sağa sola kayar.
+    double azimuth = targetAnglePID.calculate(swerveSubsystem.getPose().getRotation().getDegrees(), targetAngle.getDegrees());
 
     ChassisSpeeds speed; 
-    speed = ChassisSpeeds.fromRobotRelativeSpeeds(
+    // YENİ: Robot auto-aim yaparken İleri-Geri hareketin sahaya (Sürücüye) göre olması için FieldRelativeSpeeds kullanılmalıdır.
+    speed = ChassisSpeeds.fromFieldRelativeSpeeds(
       translationX.getAsDouble(),
       translationY.getAsDouble(), 
       azimuth, 
-      swerveSubsystem.getRotation2d()
+      swerveSubsystem.getPose().getRotation() // YENİ: Sürüş yönü de gerçek Odometriye bağlandı
     );
 
     SwerveModuleState[] states = Constants.SwerveDriveSubsystemConstants.kinematics.toSwerveModuleStates(speed);

@@ -80,7 +80,7 @@ public final class Constants {
    public static final int CancoderId = 12;
    public static final double CancoderOffsetDegrees = 0 * 360;
    public static final boolean CancoderReversed = false;
-   public static final boolean DriveMotorReversed = false;
+   public static final boolean DriveMotorReversed = true;
    public static final boolean RotationMotorReversed = false;
   }
 
@@ -90,7 +90,7 @@ public final class Constants {
    public static final int CancoderId = 15;
    public static final double CancoderOffsetDegrees = 0 * 360;
    public static final boolean CancoderReversed = false;
-   public static final boolean DriveMotorReversed = false;
+   public static final boolean DriveMotorReversed = true;
    public static final boolean RotationMotorReversed = false;
   }
   
@@ -100,7 +100,7 @@ public final class Constants {
    public static final int CancoderId = 18;
    public static final double CancoderOffsetDegrees = 0 * 360;
    public static final boolean CancoderReversed = false;
-   public static final boolean DriveMotorReversed = false;
+   public static final boolean DriveMotorReversed = true;
    public static final boolean RotationMotorReversed = false;
   }
 
@@ -110,7 +110,7 @@ public final class Constants {
    public static final int CancoderId = 21;
    public static final double CancoderOffsetDegrees = 0 * 360;
    public static final boolean CancoderReversed = false;
-   public static final boolean DriveMotorReversed = false;
+   public static final boolean DriveMotorReversed = true;
    public static final boolean RotationMotorReversed = false;
   }
 
@@ -142,8 +142,10 @@ public final class Constants {
     public static final double WheelCircumference = WheelDiameter * Math.PI;
 
     public static final double PhysicalMaxSpeed = Units.feetToMeters(12.5); //12.5 ft/s
-    public static final double LinearMaxSpeed = Units.feetToMeters(12.5);   //12.5 ft/s
-    public static final double AngularMaxSpeed = Units.feetToMeters(12.5); //12.5 ft/s || ~ 451 deg/s (7.87 rad/s)
+    // Sizin için teleop testlerindeki maksimum Sürüş ve Dönüş hızlarını %45 oranında düşürdüm. 
+    // Ustalaştıkça veya yarışmaya yaklaşırken bu 7.0 rakamını yavaşça orijinali olan 12.5'a çekebilirsiniz.
+    public static final double LinearMaxSpeed = Units.feetToMeters(7.0);   
+    public static final double AngularMaxSpeed = Units.feetToMeters(7.0);
 
     public static final double DriveEncoderPositionConversionFactor = WheelCircumference/DriveGearRatio; //motor 1 şaft turu = 3.92 cm
     public static final double DriveEncoderVelocityConversionFactor = DriveEncoderPositionConversionFactor/60;
