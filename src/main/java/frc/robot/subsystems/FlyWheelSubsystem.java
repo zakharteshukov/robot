@@ -1,4 +1,5 @@
 package frc.robot.subsystems;
+
 import static edu.wpi.first.units.Units.RPM;
 
 import com.revrobotics.PersistMode;
@@ -27,14 +28,15 @@ public class FlyWheelSubsystem extends SubsystemBase {
 
   SparkMaxConfig ShooterConfigLeft;
   SparkMaxConfig ShooterConfigRight;
-  
+
   SparkClosedLoopController LeftMotorPID;
-  RelativeEncoder LeftMotorEncoder; 
+  RelativeEncoder LeftMotorEncoder;
 
   ClosedLoopConfig leftMotorPIDConfig;
   FeedForwardConfig LeftMotorFeedForwardConfig;
 
   InterpolatingDoubleTreeMap rpmTable;
+
   public FlyWheelSubsystem() {
     ShooterMotorLeft = new SparkMax(Constants.FlyWheelConstants.ShooterMotorLeftID, MotorType.kBrushless);
     ShooterMotorRight = new SparkMax(Constants.FlyWheelConstants.ShooterMotorRightID, MotorType.kBrushless);
@@ -44,22 +46,21 @@ public class FlyWheelSubsystem extends SubsystemBase {
 
     LeftMotorPID = ShooterMotorLeft.getClosedLoopController();
     LeftMotorEncoder = ShooterMotorLeft.getEncoder();
-    
+
     leftMotorPIDConfig = new ClosedLoopConfig();
     rpmTable = new InterpolatingDoubleTreeMap();
-    
+
     leftMotorPIDConfig.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-    .pid(
-      Constants.FlyWheelConstants.kP, 
-      Constants.FlyWheelConstants.kI, 
-      Constants.FlyWheelConstants.kD
-    );
-    
+        .pid(
+            Constants.FlyWheelConstants.kP,
+            Constants.FlyWheelConstants.kI,
+            Constants.FlyWheelConstants.kD);
+
     LeftMotorFeedForwardConfig = new FeedForwardConfig();
     LeftMotorFeedForwardConfig
-    .kS(Constants.FlyWheelConstants.kS)
-    .kV(Constants.FlyWheelConstants.kV)
-    .kA(Constants.FlyWheelConstants.kA);
+        .kS(Constants.FlyWheelConstants.kS)
+        .kV(Constants.FlyWheelConstants.kV)
+        .kA(Constants.FlyWheelConstants.kA);
 
     ShooterConfigLeft.idleMode(IdleMode.kCoast);
     ShooterConfigLeft.closedLoop.feedForward.apply(LeftMotorFeedForwardConfig);
@@ -69,20 +70,17 @@ public class FlyWheelSubsystem extends SubsystemBase {
     ShooterMotorLeft.configure(ShooterConfigLeft, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     ShooterMotorRight.configure(ShooterConfigRight, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
-    rpmTable.put(0.47, -1874.28);
-    rpmTable.put(1.053, -1994.28);
-    rpmTable.put(1.21, -2000.0);
-   // rpmTable.put(2.58, );
-    //VERİ TUTMA ÖMER ABİM SEN KUKLLANIVER GARİ
-    //rpmTable.put(2.12, -2137);   TAM DÜZ DEGİL  SOLA ROTATELŞ 
-    //rpmTable.put(3.21, );         TAM DÜZ DEGİL SAG ROTATELİ
-    //rpmTable.put(0.0, 0.0);
-    //rpmTable.put(0.0, 0.0);
-    //rpmTable.put(0.0, 0.0);
+    rpmTable.put(1.68, -2000.0);
+    rpmTable.put(2.17, -1840.0);
+    rpmTable.put(2.25, -1540.3);
+    rpmTable.put(2.71, -1839.8);
+    rpmTable.put(3.03, -1930.1);
+    rpmTable.put(3.67, -2097.0);
+    rpmTable.put(4.62, -2445.7);
+    rpmTable.put(4.15, -2230.6);
 
     resetEncoder();
   }
-
 
   public void resetEncoder() {
     LeftMotorEncoder.setPosition(0);
@@ -92,14 +90,15 @@ public class FlyWheelSubsystem extends SubsystemBase {
     LeftMotorPID.setSetpoint(velocity.in(RPM), ControlType.kVelocity);
   }
 
-
   public AngularVelocity getFlywheelSpeed() {
     return RPM.of(LeftMotorEncoder.getVelocity());
   }
-  
+
   public AngularVelocity calculateRpm(double distance) {
     return RPM.of(rpmTable.get(distance));
-    //return RPM.of(14.444444 * Math.pow(d, 5) - 224.529075 * Math.pow(d, 4) + 1309.626672 * Math.pow(d, 3) - 3497.041359 * Math.pow(d, 2) + 4241.745837 * d - 44.144144);
+    // return RPM.of(14.444444 * Math.pow(d, 5) - 224.529075 * Math.pow(d, 4) +
+    // 1309.626672 * Math.pow(d, 3) - 3497.041359 * Math.pow(d, 2) + 4241.745837 * d
+    // - 44.144144);
   }
 
   @Override

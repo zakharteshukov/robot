@@ -23,14 +23,18 @@ import frc.robot.Constants;
 //FIXME dönüşüm faktörü eklenecek
 public class HoodSubsystem extends SubsystemBase {
   SparkMax hoodMotor;
-  
+
   SparkMaxConfig hoodConfig;
-  
+
   SparkClosedLoopController motorPID;
-  RelativeEncoder motorEncoder; 
+  RelativeEncoder motorEncoder;
 
   ClosedLoopConfig motorPIDConfig;
   InterpolatingDoubleTreeMap angleTable;
+
+  /**
+   * 
+   */
   public HoodSubsystem() {
     hoodMotor = new SparkMax(Constants.HoodConstants.HoodMotorID, MotorType.kBrushless);
 
@@ -38,37 +42,25 @@ public class HoodSubsystem extends SubsystemBase {
 
     motorPID = hoodMotor.getClosedLoopController();
     motorEncoder = hoodMotor.getEncoder();
-    
+
     motorPIDConfig = new ClosedLoopConfig();
     angleTable = new InterpolatingDoubleTreeMap();
-    
+
     motorPIDConfig.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-    .pid(
-      Constants.HoodConstants.kP, 
-      Constants.HoodConstants.kI, 
-      Constants.HoodConstants.kD
-    );
+        .pid(
+            Constants.HoodConstants.kP,
+            Constants.HoodConstants.kI,
+            Constants.HoodConstants.kD);
 
     hoodConfig.encoder.velocityConversionFactor(Constants.HoodConstants.HoodVelConversionF);
     hoodConfig.encoder.positionConversionFactor(Constants.HoodConstants.HoodPosConversionF);
     hoodConfig.idleMode(IdleMode.kBrake);
     hoodConfig.closedLoop.apply(motorPIDConfig);
-    
-    //TODO kod yüklendiğinde revden pid değerleri kontrol edilecek
+
+    // TODO kod yüklendiğinde revden pid değerleri kontrol edilecek
     hoodMotor.configure(hoodConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-
-    angleTable.put(0.0, 0.0);
-    angleTable.put(0.0, 0.0);
-    angleTable.put(0.0, 0.0);
-    angleTable.put(0.0, 0.0);
-    angleTable.put(0.0, 0.0);
-    angleTable.put(0.0, 0.0);
-    angleTable.put(0.0, 0.0);
-    angleTable.put(0.0, 0.0);
-
     resetEncoder();
   }
-
 
   public void resetEncoder() {
     motorEncoder.setPosition(0);
@@ -78,14 +70,15 @@ public class HoodSubsystem extends SubsystemBase {
     motorPID.setSetpoint(angle.in(Degrees), ControlType.kPosition);
   }
 
-
   public Angle getHoodAngle() {
     return Degrees.of(motorEncoder.getPosition());
   }
-  
+
   public Angle calculateAngle(double distance) {
     return Degrees.of(angleTable.get(distance));
-    //return RPM.of(14.444444 * Math.pow(d, 5) - 224.529075 * Math.pow(d, 4) + 1309.626672 * Math.pow(d, 3) - 3497.041359 * Math.pow(d, 2) + 4241.745837 * d - 44.144144);
+    // return RPM.of(14.444444 * Math.pow(d, 5) - 224.529075 * Math.pow(d, 4) +
+    // 1309.626672 * Math.pow(d, 3) - 3497.041359 * Math.pow(d, 2) + 4241.745837 * d
+    // - 44.144144);
   }
 
   @Override

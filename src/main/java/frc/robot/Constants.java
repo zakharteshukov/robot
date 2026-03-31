@@ -27,7 +27,7 @@ public final class Constants {
     public static double kV = 0.0024;
     public static double kA = 0.0;
 
-    public static double targetAnglekP = 0.0032;
+    public static double targetAnglekP = 0.06;
     public static double targetAnglekI = 0.0;
     public static double targetAnglekD = 0.0;
 
