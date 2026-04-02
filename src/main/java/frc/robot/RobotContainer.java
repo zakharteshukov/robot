@@ -122,8 +122,8 @@ public class RobotContainer {
    */
 
   private void configureBindings() {
-    pad.y().toggleOnTrue(new IntakeRollerCmd(intakeRollerSubsystem, 0.6));
-    pad.b().toggleOnTrue(new FeederCmd(feederSubsystem, -0.5));
+    pad.y().toggleOnTrue(new IntakeRollerCmd(intakeRollerSubsystem, 0.4));
+    pad.b().toggleOnTrue(new FeederCmd(feederSubsystem, -0.6));
     pad.x().toggleOnTrue(new HopperCmd(hopperSubsystem, -0.8));
 
     /// pad.leftBumper().toggleOnTrue(new IntakeCmd(intakeSubsystem, -100));
@@ -157,13 +157,29 @@ public class RobotContainer {
 
     // pad.a().whileTrue(new FeederCmd(feederSubsystem, -0.6).alongWith(new
     // HopperCmd(hopperSubsystem, -0.6)));
-    pad.a().whileTrue(new CalculateFromDistanceCmd(flyWheelSubsystem, hoodSubsystem, feederSubsystem, hopperSubsystem,
+    pad.a().whileTrue(new CalculateFromDistanceCmd(flyWheelSubsystem, hoodSubsystem,
         swerveSubsystem, () -> pad.getLeftY(), () -> pad.getLeftX()));
-    // pad.rightTrigger().whileTrue(new IntakeCmd(intakeSubsystem, 0.1));
-    // pad.leftTrigger().whileTrue(new IntakeCmd(intakeSubsystem, -0.1));
+    pad.rightTrigger().whileTrue(new IntakeCmd(intakeSubsystem, 0.8));
+    pad.leftTrigger().whileTrue(new IntakeCmd(intakeSubsystem, -0.8));
+
+    // YENİ: Intake Ağır Olduğu İçin "Yerçekimi Telafili" Otomatik Kaldır-İndir
+    // Döngüsü
+    // Kaldırmak zor olduğu için gücü 0.2 (%20) veriyoruz.
+    // İndirirken yerçekimi yardım edip kendi saldığı için sadece -0.05 veriyoruz
+    // (çarpmasın diye).
+    pad.leftStick().toggleOnTrue(
+        new edu.wpi.first.wpilibj2.command.SequentialCommandGroup(
+            new IntakeCmd(intakeSubsystem, 0.7).withTimeout(0.3), // Sıkıca Kaldır
+            new IntakeCmd(intakeSubsystem, -0.1).withTimeout(0.4) // Yerçekimiyle beraber hafifçe sal
+        ).repeatedly());
+
+    pad.rightStick().toggleOnTrue(new IntakeRollerCmd(intakeRollerSubsystem, -0.4));
+
     // pad.x().onTrue(new InstantCommand(()->swerveSubsystem.resetHeading(),
+    //
     // swerveSubsystem));
 
+    //
     // YENİ: İttifak Yönüne Göre Akıllı Gyro Sıfırlama (Pusula Sıfırlama)
     pad.start().onTrue(new InstantCommand(() -> {
       var alliance = edu.wpi.first.wpilibj.DriverStation.getAlliance();

@@ -27,21 +27,16 @@ import frc.robot.subsystems.Swerve.SwerveSubsystem;
 public class CalculateFromDistanceCmd extends Command {
   FlyWheelSubsystem flyWheelSubsystem;
   HoodSubsystem hoodSubsystem;
-  FeederSubsystem feederSubsystem;
-  HopperSubsystem hopperSubsystem;
   SwerveSubsystem swerveSubsystem;
   DoubleSupplier translationX;
   DoubleSupplier translationY;
   PIDController targetAnglePID;
 
   public CalculateFromDistanceCmd(FlyWheelSubsystem flyWheelSubsystem, HoodSubsystem hoodSubsystem,
-      FeederSubsystem feederSubsystem, HopperSubsystem hopperSubsystem,
       SwerveSubsystem swerveSubsystem,
       DoubleSupplier translationX, DoubleSupplier translationY) {
     this.flyWheelSubsystem = flyWheelSubsystem;
     this.hoodSubsystem = hoodSubsystem;
-    this.feederSubsystem = feederSubsystem;
-    this.hopperSubsystem = hopperSubsystem;
     this.swerveSubsystem = swerveSubsystem;
     this.translationX = translationX;
     this.translationY = translationY;
@@ -54,7 +49,6 @@ public class CalculateFromDistanceCmd extends Command {
     targetAnglePID.setTolerance(2.0);
     // targetAnglePID.setIntegratorRange(0, 0);
     addRequirements(flyWheelSubsystem, hoodSubsystem,
-        feederSubsystem, hopperSubsystem,
         swerveSubsystem);
   }
 
@@ -127,16 +121,23 @@ public class CalculateFromDistanceCmd extends Command {
     // Feeder'ı Çalıştır!
     // Toleransı (50 -> 150 RPM) genişlettim ki ufak dalgalanmalarda feeder
     // takılmasın.
-    if (targetAnglePID.atSetpoint()) {
-      if (Conversions.epsilonEquals(flyWheelSubsystem.getFlywheelSpeed().in(RPM), flywheelSpeed.in(RPM), 150)) {
-        feederSubsystem.FeedMotorSet(-0.6); // Ateş!
+    // Toleransı devasa (500 RPM) bir değere çektim ve açı toleransını manuel 8.0
+    // yaptım.
+    // Eğer swerve çok titriyorsa atSetpoint saniyede 50 kere yanıp söner ve feeder
+    // motorunu kilitler (twitching).
+    boolean isAngleReady = Math.abs(targetAnglePID.getPositionError()) <= 8.0;
+    boolean isRpmReady = Math.abs(flyWheelSubsystem.getFlywheelSpeed().in(RPM) - flywheelSpeed.in(RPM)) <= 500.0;
+
+    if (isAngleReady) {
+      if (isRpmReady) {
+
         edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("A_AtesZamani", true);
       } else {
-        feederSubsystem.FeedMotorSet(0.0);
+
         edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("A_AtesZamani", false);
       }
     } else {
-      feederSubsystem.FeedMotorSet(0.0);
+
       edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("A_AtesZamani", false);
     }
   }
@@ -145,7 +146,6 @@ public class CalculateFromDistanceCmd extends Command {
   @Override
   public void end(boolean interrupted) {
     flyWheelSubsystem.setFlywheelSpeed(RPM.of(0));
-    feederSubsystem.FeedMotorSet(0.0);
     edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("A_AtesZamani", false);
   }
 
