@@ -78,6 +78,7 @@ public class Telemetry {
         public void DriveRobotRelative(ChassisSpeeds robotRelativeSpeeds) { 
             var states = Constants.SwerveDriveSubsystemConstants.kinematics.toSwerveModuleStates(robotRelativeSpeeds);
             SwerveDriveKinematics.desaturateWheelSpeeds(states, Constants.ModuleConstants.PhysicalMaxSpeed);
+            setState(states);
         }
 
         public void resetPoseEstimator(Pose2d pose) {

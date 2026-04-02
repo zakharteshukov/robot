@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -18,7 +19,9 @@ import frc.robot.autoFunctions.AutoGoToZone;
 import frc.robot.commands.HopperCmd;
 import frc.robot.commands.IntakeCmd;
 import frc.robot.commands.IntakeRollerCmd;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.commands.AutoBasicShootCmd;
+import frc.robot.commands.Swerve.AutoDriveRobotRelativeDistance;
 import frc.robot.commands.CalculateFromDistanceCmd;
 import frc.robot.commands.FeederCmd;
 import frc.robot.commands.Swerve.PadWhithDriveCmd;
@@ -63,12 +66,26 @@ public class RobotContainer {
   public RobotContainer() {
     // registerNamedCommands();
     defaultAutonomousCommand =
-        new AutoBasicShootCmd(
-            flyWheelSubsystem,
-            hoodSubsystem,
-            feederSubsystem,
-            hopperSubsystem,
-            swerveSubsystem);
+        new SequentialCommandGroup(
+            new ParallelDeadlineGroup(
+                new AutoDriveRobotRelativeDistance(
+                    swerveSubsystem,
+                    AutoConstants.AutonBackXSpeedFraction,
+                    AutoConstants.AutonBackDistanceMeters,
+                    AutoConstants.AutonBackTimeoutSeconds),
+                Commands.run(
+                    () ->
+                        AutoBasicShootCmd.applyHubTrackedAim(
+                            swerveSubsystem, flyWheelSubsystem, hoodSubsystem),
+                    flyWheelSubsystem,
+                    hoodSubsystem)),
+            new AutoBasicShootCmd(
+                flyWheelSubsystem,
+                hoodSubsystem,
+                feederSubsystem,
+                hopperSubsystem,
+                swerveSubsystem,
+                AutoConstants.BasicShootDurationSeconds));
     swerveSubsystem.setDefaultCommand(new PadWhithDriveCmd(() -> pad.getLeftY(), () -> pad.getLeftX(),
         () -> pad.getRightX(), () -> true, swerveSubsystem));
     configureBindings();
@@ -232,7 +249,9 @@ public class RobotContainer {
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
-   * @return {@link AutoBasicShootCmd} (timed shoot); no dashboard chooser.
+   * @return Drive back {@link AutoConstants#AutonBackDistanceMeters} m (odometry), spinning up
+   *     shooter during the move, then {@link AutoBasicShootCmd} for {@link
+   *     AutoConstants#BasicShootDurationSeconds} s; no dashboard chooser.
    */
   public Command getAutonomousCommand() {
     return defaultAutonomousCommand;

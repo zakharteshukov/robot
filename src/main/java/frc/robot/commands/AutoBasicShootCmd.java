@@ -22,6 +22,21 @@ import frc.robot.subsystems.Swerve.SwerveSubsystem;
  */
 public class AutoBasicShootCmd extends Command {
 
+  /**
+   * Sets flywheel RPM from hub distance and hood angle for basic auto. Does not run feeder,
+   * hopper, or drivetrain; use during auton motion to spin up before the timed shoot.
+   */
+  public static void applyHubTrackedAim(
+      SwerveSubsystem swerveSubsystem,
+      FlyWheelSubsystem flyWheelSubsystem,
+      HoodSubsystem hoodSubsystem) {
+    Translation2d hub = FieldZones.HubZones.getHub().toTranslation2d();
+    double distance = hub.getDistance(swerveSubsystem.getPose().getTranslation());
+    AngularVelocity flywheelSpeed = flyWheelSubsystem.calculateRpm(distance);
+    flyWheelSubsystem.setFlywheelSpeed(flywheelSpeed);
+    hoodSubsystem.setHoodAngle(Degrees.of(AutoConstants.BasicShootHoodDegrees));
+  }
+
   private final FlyWheelSubsystem flyWheelSubsystem;
   private final HoodSubsystem hoodSubsystem;
   private final FeederSubsystem feederSubsystem;
@@ -71,12 +86,7 @@ public class AutoBasicShootCmd extends Command {
   public void execute() {
     swerveSubsystem.stopModules();
 
-    Translation2d hub = FieldZones.HubZones.getHub().toTranslation2d();
-    double distance = hub.getDistance(swerveSubsystem.getPose().getTranslation());
-    AngularVelocity flywheelSpeed = flyWheelSubsystem.calculateRpm(distance);
-    flyWheelSubsystem.setFlywheelSpeed(flywheelSpeed);
-
-    hoodSubsystem.setHoodAngle(Degrees.of(AutoConstants.BasicShootHoodDegrees));
+    applyHubTrackedAim(swerveSubsystem, flyWheelSubsystem, hoodSubsystem);
 
     feederSubsystem.FeedMotorSet(AutoConstants.BasicShootFeeder);
     hopperSubsystem.HopperMotorSet(AutoConstants.BasicShootHopper);

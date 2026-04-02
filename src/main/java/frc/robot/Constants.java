@@ -78,6 +78,15 @@ public final class Constants {
   public static final class AutoConstants {
     private AutoConstants() {}
 
+    /** Retreat distance along starting robot forward axis before shooting (meters). */
+    public static final double AutonBackDistanceMeters = 1.0;
+    /** Same convention as {@link frc.robot.commands.Swerve.AutoDriveSwerve}: negative = backward. */
+    public static final double AutonBackXSpeedFraction = -0.5;
+    /** Safety stop if distance is never reached (wheel slip, obstacle). */
+    public static final double AutonBackTimeoutSeconds = 5.0;
+    /** Finish line test margin for odometry (meters). */
+    public static final double AutonDistanceEpsilonMeters = 0.005;
+
     public static final double BasicShootDurationSeconds = 5.0;
     /** Hood position while shooting (degrees). Tune to your subwoofer / line distance. */
     public static final double BasicShootHoodDegrees = 20.0;
