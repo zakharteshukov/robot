@@ -39,8 +39,7 @@ public class Robot extends LoggedRobot{
    */
   public Robot() {
     DataLogManager.start();
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-    // autonomous chooser on
+    // Instantiate our RobotContainer.  This will perform all our button bindings.
     Logger.addDataReceiver(new WPILOGWriter());
     
   

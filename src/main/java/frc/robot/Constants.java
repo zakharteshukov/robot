@@ -74,6 +74,18 @@ public final class Constants {
     public static int FeederMotorID = 38;
   }
 
+  /** Tunables for {@link frc.robot.commands.AutoBasicShootCmd}. */
+  public static final class AutoConstants {
+    private AutoConstants() {}
+
+    public static final double BasicShootDurationSeconds = 5.0;
+    /** Hood position while shooting (degrees). Tune to your subwoofer / line distance. */
+    public static final double BasicShootHoodDegrees = 20.0;
+    /** Same sign convention as teleop ({@code FeederCmd} / {@code HopperCmd}). */
+    public static final double BasicShootFeeder = -0.6;
+    public static final double BasicShootHopper = -0.8;
+  }
+
   public static final class FrontLeftModule {
    public static final int DriveSparkId = 10;
    public static final int AngleSparkId = 11;
@@ -132,6 +144,18 @@ public final class Constants {
       //FrontLeft FrontRight BackLeft BackRight
       //(X) ön:+ | arka:- (Y) sol:+ | sağ:- 
     );
+
+    /** Max yaw rate when {@code turnSpeed == 1.0} in {@link frc.robot.commands.Swerve.AutoTurnSwerve} (rad/s). */
+    public static final double AutoMaxAngularVelocityRadPerSec = 3.0;
+
+    /** Finish turning when within this many degrees of the target (each side). */
+    public static final double AutoTurnAngleToleranceDeg = 2.5;
+
+    /**
+     * Scales the commanded turn angle (like tank encoder auto). {@code 1.0} = full target;
+     * use slightly below 1.0 if the robot consistently overshoots.
+     */
+    public static final double AutoTurnAngleScalar = 1.0;
   }
   
   public static final class ModuleConstants {

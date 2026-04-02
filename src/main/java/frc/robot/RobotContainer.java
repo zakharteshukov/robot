@@ -3,12 +3,6 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.simulation.FlywheelSim;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -24,6 +18,7 @@ import frc.robot.autoFunctions.AutoGoToZone;
 import frc.robot.commands.HopperCmd;
 import frc.robot.commands.IntakeCmd;
 import frc.robot.commands.IntakeRollerCmd;
+import frc.robot.commands.AutoBasicShootCmd;
 import frc.robot.commands.CalculateFromDistanceCmd;
 import frc.robot.commands.FeederCmd;
 import frc.robot.commands.Swerve.PadWhithDriveCmd;
@@ -46,7 +41,7 @@ import frc.robot.vision.PoseEstimator;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  private final SendableChooser<Command> autoChooser;
+  private final Command defaultAutonomousCommand;
   SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
   HopperSubsystem hopperSubsystem = new HopperSubsystem();
   IntakeRollerSubsystem intakeRollerSubsystem = new IntakeRollerSubsystem();
@@ -67,11 +62,16 @@ public class RobotContainer {
    */
   public RobotContainer() {
     // registerNamedCommands();
-    autoChooser = AutoBuilder.buildAutoChooser();
+    defaultAutonomousCommand =
+        new AutoBasicShootCmd(
+            flyWheelSubsystem,
+            hoodSubsystem,
+            feederSubsystem,
+            hopperSubsystem,
+            swerveSubsystem);
     swerveSubsystem.setDefaultCommand(new PadWhithDriveCmd(() -> pad.getLeftY(), () -> pad.getLeftX(),
         () -> pad.getRightX(), () -> true, swerveSubsystem));
     configureBindings();
-    SmartDashboard.putData("AutonomousModeChooser", autoChooser);
   }
 
   /*
@@ -232,10 +232,9 @@ public class RobotContainer {
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
-   * @return the command to run in autonomous
+   * @return {@link AutoBasicShootCmd} (timed shoot); no dashboard chooser.
    */
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
-    // return new AutoGoToZone(swerveSubsystem).goTo(FieldZones.getZone(1));
+    return defaultAutonomousCommand;
   }
 }
